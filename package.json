@@ -1,0 +1,31 @@
+{
+  "name": "elm-blind-css",
+  "version": "1.0.0",
+  "description": "Elm applications for blind css challenge",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test",
+    "start": "parcel ./index.html",
+    "build": "parcel build ./index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jgrenat/elm-blind-css.git"
+  },
+  "keywords": [
+    "elm",
+    "css",
+    "blind"
+  ],
+  "author": "jgrenat",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jgrenat/elm-blind-css/issues"
+  },
+  "homepage": "https://github.com/jgrenat/elm-blind-css#readme",
+  "devDependencies": {
+    "elm-hot": "^1.1.0",
+    "node-elm-compiler": "^5.0.3",
+    "parcel-bundler": "^1.12.3"
+  }
+}
