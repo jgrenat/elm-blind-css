@@ -2,8 +2,8 @@ port module Main exposing (main)
 
 import Browser exposing (Document)
 import Browser.Navigation as Navigation
-import Html exposing (div)
-import Html.Attributes exposing (id, style)
+import Html exposing (div, img)
+import Html.Attributes exposing (id, src, style)
 import Html.Lazy
 import Url
 
@@ -21,7 +21,9 @@ main =
 
 
 type alias Model =
-    {}
+    { css : String
+    , html : String
+    }
 
 
 type Msg
@@ -32,42 +34,52 @@ type Msg
 
 init : () -> Url.Url -> Navigation.Key -> ( Model, Cmd Msg )
 init _ url key =
-    ( {}, Cmd.none )
+    ( { css = "", html = "" }, Cmd.none )
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        Noop ->
+            ( model, Cmd.none )
+
+        OnCssChange newCss ->
+            ( { model | css = newCss }, sendToServer <| SaveData model.html newCss )
+
+        OnHtmlChange newHtml ->
+            ( { model | html = newHtml }, sendToServer <| SaveData newHtml model.css )
 
 
 view : Model -> Document Msg
 view model =
     Document "Blind CSS Challenge "
-        [ div
-            [ id "html-container"
-            , style "height" "20vh"
-            , style "width" "60vw"
-            , style "border" "1px solid black"
-            , style "box-sizing" "border-box"
-            ]
-            []
-        , Html.Lazy.lazy
-            (always <|
-                div
-                    [ id "css-container"
-                    , style "height" "80vh"
+        [ div [ style "display" "flex" ]
+            [ div []
+                [ div
+                    [ id "html-container"
+                    , style "height" "20vh"
                     , style "width" "60vw"
                     , style "border" "1px solid black"
                     , style "box-sizing" "border-box"
                     ]
                     []
-            )
-            ()
+                , Html.Lazy.lazy
+                    (always <|
+                        div
+                            [ id "css-container"
+                            , style "height" "calc(80vh - 10px)"
+                            , style "width" "60vw"
+                            , style "margin-top" "10px"
+                            , style "border" "1px solid black"
+                            , style "box-sizing" "border-box"
+                            ]
+                            []
+                    )
+                    ()
+                ]
+            , div [ id "right-column", style "margin-left" "20px" ] [ img [ src "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_024.jpg" ] [] ]
+            ]
         ]
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    let
-        _ =
-            Debug.log "received" msg
-    in
-    ( model, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -79,3 +91,10 @@ port cssChanged : (String -> msg) -> Sub msg
 
 
 port htmlChanged : (String -> msg) -> Sub msg
+
+
+port sendToServer : SaveData -> Cmd msg
+
+
+type alias SaveData =
+    { html : String, css : String }

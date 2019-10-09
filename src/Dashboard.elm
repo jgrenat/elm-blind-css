@@ -1,0 +1,162 @@
+port module Dashboard exposing (main)
+
+import Browser exposing (Document)
+import Html exposing (Html, button, div, h1, img, text)
+import Html.Attributes exposing (class, property, src, style)
+import Html.Events exposing (onClick)
+import Html.Parser
+import Json.Decode as Decode exposing (Error, Value)
+import Json.Encode as Encode
+import Result exposing (Result(..))
+
+
+main : Program () AppModel Msg
+main =
+    Browser.document
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
+
+
+type AppModel
+    = Home
+    | Game Model
+
+
+type alias Model =
+    { players : List Player
+    , poster : String
+    }
+
+
+type alias Player =
+    { id : String
+    , html : String
+    , css : String
+    }
+
+
+type Msg
+    = OnPlayersReceived (Result Error (List Player))
+    | SelectPoster String
+
+
+init : () -> ( AppModel, Cmd Msg )
+init _ =
+    ( Home, Cmd.none )
+
+
+update : Msg -> AppModel -> ( AppModel, Cmd Msg )
+update msg appModel =
+    let
+        _ =
+            Debug.log "received" msg
+    in
+    case ( appModel, msg ) of
+        ( Home, SelectPoster poster ) ->
+            ( Game { players = [], poster = poster }, Cmd.none )
+
+        ( Home, _ ) ->
+            ( Home, Cmd.none )
+
+        ( Game model, OnPlayersReceived (Ok players) ) ->
+            ( Game { model | players = players }, Cmd.none )
+
+        ( Game model, OnPlayersReceived (Err _) ) ->
+            ( Game model, Cmd.none )
+
+        ( Game model, SelectPoster _ ) ->
+            ( Game model, Cmd.none )
+
+
+view : AppModel -> Document Msg
+view appModel =
+    case appModel of
+        Home ->
+            Document "Blind CSS Challenge " [ title, viewOptions ]
+
+        Game model ->
+            Document "Blind CSS Challenge " <| title :: img [ src model.poster, style "max-width" "300px" ] [] :: List.map showPlayer model.players
+
+
+moviePosters : List String
+moviePosters =
+    [ "https://www.2tout2rien.fr/wp-content/uploads/2013/05/affiches-de-films-minimalistes-superman.jpg"
+    , "https://www.2tout2rien.fr/wp-content/uploads/2013/05/affiches-de-films-minimalistes-full-metal-jacket.jpg"
+    , "https://i.pinimg.com/originals/bb/1e/1b/bb1e1b351d671b37a2b8c41cea2b6f43.jpg"
+    , "https://i.pinimg.com/originals/66/45/8c/66458ca4b6c5d797bf97d5241c98bf35.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_121.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_102.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_101.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_092.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_056.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_041.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_030.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_024.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_124.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_061.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_064.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_066.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_068.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_116.jpg"
+    , "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_127.jpg"
+    ]
+
+
+viewOptions : Html Msg
+viewOptions =
+    div [ style "text-align" "center", class "posters" ]
+        (List.map (\poster -> button [ class "posterButton", onClick (SelectPoster poster) ] [ img [ src poster ] [] ]) moviePosters)
+
+
+title : Html msg
+title =
+    h1 [ style "text-align" "center" ] [ text "Blind CSS Challenge!" ]
+
+
+showPlayer : Player -> Html Msg
+showPlayer player =
+    case Html.Parser.run player.html of
+        Ok html ->
+            div
+                [ style "width" "30vw"
+                , style "height" "30vw"
+                , style "border" "1px solid black"
+                , style "margin" "1vw"
+                ]
+                [ Html.node "app-visualizer" [ property "css" (Encode.string player.css), property "html" (Encode.string player.html) ] [] ]
+
+        Err _ ->
+            div
+                [ style "width" "30vw"
+                , style "height" "30vw"
+                , style "border" "1px solid black"
+                , style "margin" "1vw"
+                , style "display" "flex"
+                , style "justify-content" "center"
+                , style "align-items" "center"
+                ]
+                [ text "It's HTML is invalid..." ]
+
+
+subscriptions : AppModel -> Sub Msg
+subscriptions appModel =
+    case appModel of
+        Home ->
+            Sub.none
+
+        Game model ->
+            playersReceived (Decode.decodeValue (Decode.list playerDecoder) >> OnPlayersReceived)
+
+
+playerDecoder : Decode.Decoder Player
+playerDecoder =
+    Decode.map3 Player
+        (Decode.field "id" Decode.string)
+        (Decode.field "html" Decode.string)
+        (Decode.field "css" Decode.string)
+
+
+port playersReceived : (Value -> msg) -> Sub msg
