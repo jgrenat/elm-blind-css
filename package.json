@@ -7,7 +7,7 @@
     "test": "npm test",
     "start": "sh ./build-workers.sh && parcel ./index.html",
     "start:dashboard": "parcel ./dashboard.html --port=8080",
-    "build": "sh ./build-workers.sh && parcel build ./index.html"
+    "build": "sh ./build-workers.sh && parcel build ./index.html ./dashboard.html"
   },
   "repository": {
     "type": "git",

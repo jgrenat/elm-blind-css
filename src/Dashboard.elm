@@ -2,7 +2,7 @@ port module Dashboard exposing (main)
 
 import Browser exposing (Document)
 import GameState exposing (GameState)
-import Html exposing (Html, button, div, h1, img, text)
+import Html exposing (Html, button, div, figure, h1, img, text)
 import Html.Attributes exposing (class, property, src, style)
 import Html.Events exposing (onClick)
 import Html.Parser
@@ -51,10 +51,6 @@ init _ =
 
 update : Msg -> AppModel -> ( AppModel, Cmd Msg )
 update msg appModel =
-    let
-        _ =
-            Debug.log "received" msg
-    in
     case ( appModel, msg ) of
         ( Home, SelectPoster poster ) ->
             ( Game { players = [], poster = poster }, changeGameState (GameState (Just poster)) )
@@ -123,7 +119,9 @@ title =
 
 displayTemplate : String -> Html Msg
 displayTemplate source =
-    img [ src source, style "max-width" "300px", style "order" "2" ] []
+    figure [ style "order" "2" ]
+        [ img [ src source, style "max-width" "300px" ] []
+        ]
 
 
 showPlayer : Player -> Html Msg
