@@ -1,7 +1,7 @@
 port module Main exposing (main)
 
 import Browser exposing (Document)
-import Html exposing (div, img)
+import Html exposing (div, img, text)
 import Html.Attributes exposing (id, src, style)
 import Html.Lazy
 import Json.Decode as Decode exposing (Value)
@@ -61,7 +61,7 @@ update msg model =
 
 gameStateDecoder : Decode.Decoder GameState
 gameStateDecoder =
-    Decode.field "poster" (Decode.maybe Decode.string)
+    Decode.field "posterUrl" (Decode.maybe Decode.string)
         |> Decode.map GameState
 
 
@@ -92,7 +92,14 @@ view model =
                     )
                     ()
                 ]
-            , div [ id "right-column", style "margin-left" "20px" ] [ img [ src "http://media.topito.com/wp-content/uploads/2010/09/affiche_minimaliste_024.jpg" ] [] ]
+            , div [ id "right-column", style "margin-left" "20px" ]
+                [ case model.poster of
+                    Just poster ->
+                        img [ src poster, style "width" "100%" ] []
+
+                    Nothing ->
+                        text ""
+                ]
             ]
         ]
 

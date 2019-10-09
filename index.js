@@ -46,6 +46,10 @@ elmApp.ports.sendToServer.subscribe(data => {
         .catch(console.error);
 });
 
+gameState.onSnapshot(state => {
+    elmApp.ports.gameStateChanged.send(state.data());
+})
+
 setTimeout(() => {
         const cssEditor = monaco.editor.create(document.getElementById('css-container'), {
             value: [
@@ -84,10 +88,6 @@ setTimeout(() => {
             const value = htmlEditor.getValue();
             elmApp.ports.htmlChanged.send(value);
         });
-
-    gameState.onSnapshot(state => {
-        elmApp.ports.gameStateChanged.send(state);
-    })
 
     }, 1000
 );
