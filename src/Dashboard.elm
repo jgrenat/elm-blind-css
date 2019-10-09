@@ -118,7 +118,7 @@ title =
 showPlayer : Player -> Html Msg
 showPlayer player =
     case Html.Parser.run player.html of
-        Ok html ->
+        Ok _ ->
             div
                 [ style "width" "30vw"
                 , style "height" "30vw"
@@ -146,7 +146,7 @@ subscriptions appModel =
         Home ->
             Sub.none
 
-        Game model ->
+        Game _ ->
             playersReceived (Decode.decodeValue (Decode.list playerDecoder) >> OnPlayersReceived)
 
 

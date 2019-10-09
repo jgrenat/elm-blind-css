@@ -1,22 +1,19 @@
 port module Main exposing (main)
 
 import Browser exposing (Document)
-import Browser.Navigation as Navigation
 import Html exposing (div, img)
 import Html.Attributes exposing (id, src, style)
 import Html.Lazy
-import Url
+import Json.Decode as Decode exposing (Value)
 
 
 main : Program () Model Msg
 main =
-    Browser.application
+    Browser.document
         { init = init
         , view = view
         , update = update
         , subscriptions = subscriptions
-        , onUrlRequest = always Noop
-        , onUrlChange = always Noop
         }
 
 
@@ -28,32 +25,44 @@ type alias Model =
 
 
 type alias GameState =
-    { poster : String
+    { poster : Maybe String
     }
 
 
+type State
+    = Waiting
+
+
 type Msg
-    = Noop
-    | OnCssChange String
+    = OnCssChange String
     | OnHtmlChange String
+    | OnGameStateChange Value
 
 
-init : () -> Url.Url -> Navigation.Key -> ( Model, Cmd Msg )
-init _ url key =
+init : () -> ( Model, Cmd Msg )
+init _ =
     ( { css = "", html = "", poster = Nothing }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Noop ->
-            ( model, Cmd.none )
-
         OnCssChange newCss ->
             ( { model | css = newCss }, sendToServer <| SaveData model.html newCss )
 
         OnHtmlChange newHtml ->
             ( { model | html = newHtml }, sendToServer <| SaveData newHtml model.css )
+
+        OnGameStateChange state ->
+            Decode.decodeValue gameStateDecoder state
+                |> Result.withDefault (GameState Nothing)
+                |> (\gameState -> ( { model | poster = gameState.poster }, Cmd.none ))
+
+
+gameStateDecoder : Decode.Decoder GameState
+gameStateDecoder =
+    Decode.field "poster" (Decode.maybe Decode.string)
+        |> Decode.map GameState
 
 
 view : Model -> Document Msg
@@ -90,13 +99,16 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.batch [ cssChanged OnCssChange, htmlChanged OnHtmlChange ]
+    Sub.batch [ cssChanged OnCssChange, htmlChanged OnHtmlChange, gameStateChanged OnGameStateChange ]
 
 
 port cssChanged : (String -> msg) -> Sub msg
 
 
 port htmlChanged : (String -> msg) -> Sub msg
+
+
+port gameStateChanged : (Value -> msg) -> Sub msg
 
 
 port sendToServer : SaveData -> Cmd msg

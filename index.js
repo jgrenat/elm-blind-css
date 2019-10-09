@@ -32,8 +32,12 @@ const firebaseApp = firebase.initializeApp({
     messagingSenderId: "142765605102",
     appId: "1:142765605102:web:e41f9a2927451325"
 });
-const documentId = generateId();
-const playerDocument = firebaseApp.firestore().collection('players').doc(documentId);
+const playerId = localStorage.getItem('playerId') || generateId();
+localStorage.setItem('playedId', playerId);
+const playerDocument = firebaseApp.firestore().collection('players').doc(playerId);
+
+const gameState = firebaseApp.firestore().collection('gameState')
+    .doc('ehkxFmwdXtX6owQ9gCp4');
 
 const elmApp = Elm.Main.init({flags: null});
 
@@ -80,6 +84,10 @@ setTimeout(() => {
             const value = htmlEditor.getValue();
             elmApp.ports.htmlChanged.send(value);
         });
+
+    gameState.onSnapshot(state => {
+        elmApp.ports.gameStateChanged.send(state);
+    })
 
     }, 1000
 );
