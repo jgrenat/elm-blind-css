@@ -48,7 +48,7 @@ elmApp.ports.sendToServer.subscribe(data => {
 
 gameState.onSnapshot(state => {
     elmApp.ports.gameStateChanged.send(state.data());
-})
+});
 
 setTimeout(() => {
         const cssEditor = monaco.editor.create(document.getElementById('css-container'), {

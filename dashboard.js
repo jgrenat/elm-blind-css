@@ -12,8 +12,15 @@ const firebaseApp = firebase.initializeApp({
     appId: "1:142765605102:web:e41f9a2927451325"
 });
 const collection = firebaseApp.firestore().collection('players');
+const gameStateDocument = firebaseApp.firestore().collection('gameState')
+    .doc('ehkxFmwdXtX6owQ9gCp4');
 
 const elmApp = Elm.Dashboard.init({flags: null});
+
+elmApp.ports.changeGameState.subscribe(gameState => {
+    gameStateDocument.set({posterUrl: gameState.poster})
+        .catch(console.error);
+});
 
 setInterval(() => {
     collection.get().then(data => {

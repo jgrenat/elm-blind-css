@@ -1,6 +1,7 @@
 port module Dashboard exposing (main)
 
 import Browser exposing (Document)
+import GameState exposing (GameState)
 import Html exposing (Html, button, div, h1, img, text)
 import Html.Attributes exposing (class, property, src, style)
 import Html.Events exposing (onClick)
@@ -56,7 +57,7 @@ update msg appModel =
     in
     case ( appModel, msg ) of
         ( Home, SelectPoster poster ) ->
-            ( Game { players = [], poster = poster }, Cmd.none )
+            ( Game { players = [], poster = poster }, changeGameState (GameState (Just poster)) )
 
         ( Home, _ ) ->
             ( Home, Cmd.none )
@@ -156,6 +157,9 @@ playerDecoder =
         (Decode.field "id" Decode.string)
         (Decode.field "html" Decode.string)
         (Decode.field "css" Decode.string)
+
+
+port changeGameState : GameState -> Cmd msg
 
 
 port playersReceived : (Value -> msg) -> Sub msg

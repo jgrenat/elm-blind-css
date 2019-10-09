@@ -1,6 +1,7 @@
 port module Main exposing (main)
 
 import Browser exposing (Document)
+import GameState exposing (GameState, gameStateDecoder)
 import Html exposing (div, img, text)
 import Html.Attributes exposing (id, src, style)
 import Html.Lazy
@@ -21,11 +22,6 @@ type alias Model =
     { css : String
     , html : String
     , poster : Maybe String
-    }
-
-
-type alias GameState =
-    { poster : Maybe String
     }
 
 
@@ -59,12 +55,6 @@ update msg model =
                 |> (\gameState -> ( { model | poster = gameState.poster }, Cmd.none ))
 
 
-gameStateDecoder : Decode.Decoder GameState
-gameStateDecoder =
-    Decode.field "posterUrl" (Decode.maybe Decode.string)
-        |> Decode.map GameState
-
-
 view : Model -> Document Msg
 view model =
     Document "Blind CSS Challenge "
@@ -95,7 +85,13 @@ view model =
             , div [ id "right-column", style "margin-left" "20px" ]
                 [ case model.poster of
                     Just poster ->
-                        img [ src poster, style "width" "100%" ] []
+                        img
+                            [ src poster
+                            , style "max-width" "90%"
+                            , style "max-height" "50vh"
+                            , style "margin" "20px 10px 0 10px"
+                            ]
+                            []
 
                     Nothing ->
                         text ""
