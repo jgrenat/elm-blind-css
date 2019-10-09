@@ -26,3 +26,11 @@ body {
 .posterButton img {
     width: 100%;
 }
+
+.player:first-of-type {
+    order: 1;
+}
+
+.player {
+    order: 3;
+}

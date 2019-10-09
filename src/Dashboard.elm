@@ -79,7 +79,12 @@ view appModel =
             Document "Blind CSS Challenge " [ title, viewOptions ]
 
         Game model ->
-            Document "Blind CSS Challenge " <| title :: img [ src model.poster, style "max-width" "300px" ] [] :: List.map showPlayer model.players
+            Document "Blind CSS Challenge " <|
+                [ title
+                , div
+                    [ style "display" "flex", style "justify-content" "space-between" ]
+                    (displayTemplate model.poster :: List.map showPlayer model.players)
+                ]
 
 
 moviePosters : List String
@@ -116,6 +121,11 @@ title =
     h1 [ style "text-align" "center" ] [ text "Blind CSS Challenge!" ]
 
 
+displayTemplate : String -> Html Msg
+displayTemplate source =
+    img [ src source, style "max-width" "300px", style "order" "2" ] []
+
+
 showPlayer : Player -> Html Msg
 showPlayer player =
     case Html.Parser.run player.html of
@@ -125,6 +135,7 @@ showPlayer player =
                 , style "height" "30vw"
                 , style "border" "1px solid black"
                 , style "margin" "1vw"
+                , class "player"
                 ]
                 [ Html.node "app-visualizer" [ property "css" (Encode.string player.css), property "html" (Encode.string player.html) ] [] ]
 
