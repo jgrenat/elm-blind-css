@@ -23,6 +23,12 @@ main =
 type alias Model =
     { css : String
     , html : String
+    , poster : Maybe String
+    }
+
+
+type alias GameState =
+    { poster : String
     }
 
 
@@ -34,7 +40,7 @@ type Msg
 
 init : () -> Url.Url -> Navigation.Key -> ( Model, Cmd Msg )
 init _ url key =
-    ( { css = "", html = "" }, Cmd.none )
+    ( { css = "", html = "", poster = Nothing }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
