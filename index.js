@@ -33,7 +33,7 @@ const firebaseApp = firebase.initializeApp({
     appId: "1:142765605102:web:e41f9a2927451325"
 });
 const playerId = localStorage.getItem('playerId') || generateId();
-localStorage.setItem('playedId', playerId);
+localStorage.setItem('playerId', playerId);
 const playerDocument = firebaseApp.firestore().collection('players').doc(playerId);
 
 const gameState = firebaseApp.firestore().collection('gameState')
@@ -41,10 +41,10 @@ const gameState = firebaseApp.firestore().collection('gameState')
 
 const elmApp = Elm.Main.init({flags: null});
 
-elmApp.ports.sendToServer.subscribe(data => {
+elmApp.ports.sendToServer.subscribe(debounce(data => {
     playerDocument.set({css: data.css, html:  data.html})
         .catch(console.error);
-});
+}, 1500));
 
 gameState.onSnapshot(state => {
     elmApp.ports.gameStateChanged.send(state.data());
@@ -85,9 +85,25 @@ setTimeout(() => {
             language: 'html'
         });
         htmlEditor.onDidChangeModelContent(modelContentChangedEvent => {
+            console.log('bouh');
             const value = htmlEditor.getValue();
             elmApp.ports.htmlChanged.send(value);
         });
 
     }, 1000
 );
+
+function debounce(func, wait, immediate) {
+    var timeout;
+    return function() {
+        var context = this, args = arguments;
+        var later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args);
+    };
+};

@@ -54,7 +54,6 @@ class AppVisualizer extends HTMLElement {
     }
 
     changeContent() {
-        console.log("changed");
         this.shadowRoot.innerHTML = this._html;
         const style = document.createElement('style');
         style.innerHTML = this._css;
