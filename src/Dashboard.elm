@@ -146,6 +146,7 @@ showPlayer player =
                 , style "display" "flex"
                 , style "justify-content" "center"
                 , style "align-items" "center"
+                , class "player"
                 ]
                 [ text "It's HTML is invalid..." ]
 

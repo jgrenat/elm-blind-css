@@ -42,7 +42,7 @@ const gameState = firebaseApp.firestore().collection('gameState')
 const elmApp = Elm.Main.init({flags: null});
 
 elmApp.ports.sendToServer.subscribe(debounce(data => {
-    playerDocument.set({css: data.css, html:  data.html})
+    playerDocument.set({css: data.css, html: data.html})
         .catch(console.error);
 }, 1500));
 
@@ -85,19 +85,21 @@ setTimeout(() => {
             language: 'html'
         });
         htmlEditor.onDidChangeModelContent(modelContentChangedEvent => {
-            console.log('bouh');
             const value = htmlEditor.getValue();
             elmApp.ports.htmlChanged.send(value);
         });
 
+
+        elmApp.ports.cssChanged.send(cssEditor.getValue());
+        elmApp.ports.htmlChanged.send(htmlEditor.getValue());
     }, 1000
 );
 
 function debounce(func, wait, immediate) {
     var timeout;
-    return function() {
+    return function () {
         var context = this, args = arguments;
-        var later = function() {
+        var later = function () {
             timeout = null;
             if (!immediate) func.apply(context, args);
         };
@@ -106,4 +108,4 @@ function debounce(func, wait, immediate) {
         timeout = setTimeout(later, wait);
         if (callNow) func.apply(context, args);
     };
-};
+}
